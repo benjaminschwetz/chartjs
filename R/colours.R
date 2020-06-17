@@ -27,11 +27,27 @@ NULL
 
 # Format a list of colours for a type of graph and possible existing series
 cjs_get_colours <- function(chartjs, n){
-  if (!is.list(chartjs$x$palette)) {
-    vecColors <- baseColors(chartjs$x$palette)
+  # theme = chart styling
+  # palette = color coding for data
+  if(is.character(chartjs$x$palette)){ #brewer or palette vector
+    if(length(chartjs$x$palette) == 1){ #brewer
+      vecColors <- baseColors(chartjs$x$palette)
+    } else {
+      if(all(grepl(
+        pattern = "#[a-f0-9]{6}",
+        chartjs$x$palette,
+        ignore.case = TRUE))
+      ) {
+        vecColors <- chartjs$x$palette
+      } else stop("Colors must be specified in the format #123456")
+    }
+  } else {
+    #error
+  }
+  # at this point we have vecColors
+  if (!is.list(chartjs$x$theme)) {
     chartjs %>% cjs_get_chart_colours(vecColors, n)
   } else chartjs %>% cjs_get_custom_colours(n)
-
 }
 
 cjs_get_chart_colours <- function(x, ...){
@@ -79,7 +95,7 @@ cjs_get_chart_colours.cjs_polarArea <- cjs_get_chart_colours.cjs_pie
 
 # Get custom colours
 cjs_get_custom_colours <- function(chartjs, n){
-  listColors <- chartjs$x$palette
+  listColors <- chartjs$x$theme
   n <- n + 1
   res <- list(borderColor = listColors$border[n],
               backgroundColor = listColors$background[n],
